@@ -13,7 +13,7 @@ export class UsersService {
   ) { }
 
   async create(createUserDto: CreateUserDto) {
-    const user = User.create(createUserDto)
+    const user = this.usersRepository.create(createUserDto)
 
     return await user.save()
   }
@@ -21,7 +21,7 @@ export class UsersService {
   async listUsers(page: number, perPage: number, searchString?: string) {
     const skip = (page - 1) * perPage
 
-    const [result, total] = await User.findAndCount({
+    const [result, total] = await this.usersRepository.findAndCount({
       where: [{ full_name: Like(`%${searchString || ''}%`) }, { cpf: searchString }],
       select: ['id', 'full_name', 'cpf', 'role'],
       take: perPage,
@@ -43,11 +43,11 @@ export class UsersService {
   }
 
   async findUser(id: string) {
-    return await User.findOneOrFail(id);
+    return await this.usersRepository.findOneOrFail(id);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await User.findOneOrFail(id);
+    const user = await this.usersRepository.findOneOrFail(id);
 
     const updatedUser = User.merge(user, updateUserDto);
     
@@ -59,7 +59,7 @@ export class UsersService {
   async deactivateById(id: string, reason: string) {
     const user = await User.findOneOrFail(id);
 
-    const updatedUser = User.merge(user, {
+    const updatedUser = this.usersRepository.merge(user, {
       is_active: false,
       deactivation_reason: reason
     });
