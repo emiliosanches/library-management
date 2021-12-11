@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, Query, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { BanUserDTO } from './dto/ban-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -29,8 +30,13 @@ export class UsersController {
     return await this.usersService.update(id, updateUserDto);
   }
 
-  @Delete(':id')
-  async banUser(@Param('id') id: string, @Query('reason') reason: string) {
+  @Patch(':id/ban')
+  async banUser(@Param('id') id: string, @Body() { reason }: BanUserDTO) {
     return await this.usersService.deactivateById(id, reason);
+  }
+
+  @Patch(':id/unban')
+  async unbanUser(@Param('id') id: string) {
+    return await this.usersService.reactivateById(id);
   }
 }

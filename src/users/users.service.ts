@@ -67,5 +67,19 @@ export class UsersService {
     await updatedUser.save();
     
     return updatedUser;
+  
+  }
+  
+  async reactivateById(id: string) {
+    const user = await User.findOneOrFail(id);
+
+    const updatedUser = this.usersRepository.merge(user, {
+      is_active: true,
+      deactivation_reason: undefined
+    });
+    
+    await updatedUser.save();
+    
+    return updatedUser;
   }
 }
