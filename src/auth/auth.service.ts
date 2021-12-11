@@ -21,13 +21,13 @@ export class AuthService {
   async login({ cpf, password }: { cpf: string, password: string }) {
     const user = await this.validateUser(cpf, password)
 
-    if (!user) return new BadRequestException('Invalid credentials')
+    if (!user) throw new BadRequestException('Invalid credentials')
 
     delete user.password;
 
     return {
       user: user,
-      access_token: this.jwtService.sign(user)
+      access_token: this.jwtService.sign({ ...user })
     };
   }
 }
