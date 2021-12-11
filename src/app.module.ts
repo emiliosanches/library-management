@@ -5,6 +5,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { RootConfig } from './env';
 import { UsersModule } from './users/users.module';
+// import { CaslModule } from './casl/casl.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [TypeOrmModule.forRootAsync({
@@ -23,7 +25,7 @@ import { UsersModule } from './users/users.module';
   }), UsersModule, TypedConfigModule.forRoot({
     schema: RootConfig,
     load: dotenvLoader()
-  })],
+  }), AuthModule],
   controllers: [AppController],
   providers: [AppService],
 })

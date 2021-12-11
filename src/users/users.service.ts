@@ -46,6 +46,12 @@ export class UsersService {
     return await this.usersRepository.findOneOrFail(id);
   }
 
+  async findByDocument(cpf: string) {
+    return await this.usersRepository.findOne({
+      where: { cpf }
+    });
+  }
+
   async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.usersRepository.findOneOrFail(id);
 
@@ -69,7 +75,7 @@ export class UsersService {
     return updatedUser;
   
   }
-  
+
   async reactivateById(id: string) {
     const user = await User.findOneOrFail(id);
 
