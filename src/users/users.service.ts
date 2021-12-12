@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Like, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -12,8 +12,10 @@ export class UsersService {
     private usersRepository: Repository<User>
   ) { }
 
-  async create(createUserDto: CreateUserDto) {
-    const user = this.usersRepository.create(createUserDto)
+  async create(data: CreateUserDto) {
+    if (await this.findByDocument(data.cpf)) throw new BadRequestException('O cpf informado já está cadastrado')
+
+    const user = this.usersRepository.create(data)
 
     return await user.save()
   }
@@ -52,10 +54,10 @@ export class UsersService {
     });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto) {
+  async updateById(id: string, data: UpdateUserDto) {
     const user = await this.usersRepository.findOneOrFail(id);
 
-    const updatedUser = User.merge(user, updateUserDto);
+    const updatedUser = User.merge(user, data);
     
     await updatedUser.save();
     
