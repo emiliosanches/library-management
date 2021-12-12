@@ -1,9 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
-import { AppAbility, CaslAbilityFactory } from '../casl/casl-ability.factory';
+import { AppAbility, CaslAbilityFactory } from '../../casl/casl-ability.factory';
 
-export type CaslHandler = (ability: AppAbility, req: Request) => boolean;
+export type CaslHandler = (ability: AppAbility, req: Request) => boolean | Promise<boolean>;
 
 @Injectable()
 export class CaslGuard implements CanActivate {
@@ -22,8 +22,10 @@ export class CaslGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const ability = this.caslAbilityFactory.createForUser(request.user);
 
-    return caslHandlers.every((handler) =>
-      handler(ability, request),
-    );
+    const results = await Promise.all([
+      ...caslHandlers.map(handler => handler(ability, request))
+    ])
+
+    return results.every(v => v)
   }
 }

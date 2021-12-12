@@ -5,17 +5,19 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { BanUserDto } from './dto/ban-user.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from 'src/auth/guards/optional-jwt-auth.guard';
-import { CaslGuard } from 'src/guards/casl.guard';
-import { CheckAbilities } from 'src/guards/casl.decorator';
+import { CaslGuard } from 'src/guards/casl/casl.guard';
+import { CheckAbilities } from 'src/guards/casl/casl.decorator';
 import { Action } from 'src/casl/actions';
 import { User } from './entities/user.entity';
+import { subject } from '@casl/ability';
+import { canById } from 'src/casl/helpers';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @UseGuards(OptionalJwtAuthGuard, CaslGuard)
-  @CheckAbilities((ability, req) => ability.can(Action.Create, User.create(req.body as CreateUserDto)))
+  @CheckAbilities((ability, req) => ability.can(Action.Create, subject('User', req.body)))
   @Post()
   async store(@Body() data: CreateUserDto) {
     return await this.usersService.create(data);
@@ -32,21 +34,21 @@ export class UsersController {
   }
 
   @UseGuards(JwtAuthGuard, CaslGuard)
-  @CheckAbilities((ability, req) => Object.keys(req.body).every(key => ability.can(Action.Update, User.create({ id: req.params.id }), key)))
+  @CheckAbilities((ability, req) => canById(ability, Action.Update, User, req.params.id))
   @Patch(':id')
   async update(@Param('id') id: string, @Body() data: UpdateUserDto) {
-    return await this.usersService.update(id, data);
+    return await this.usersService.updateById(id, data);
   }
 
   @UseGuards(JwtAuthGuard, CaslGuard)
-  @CheckAbilities((ability, req) => ability.can(Action.Ban, User.create({ id: req.params.id })))
+  @CheckAbilities(async (ability, req) => canById(ability, Action.Ban, User, req.params.id))
   @Patch(':id/ban')
   async banUser(@Param('id') id: string, @Body() { reason }: BanUserDto) {
     return await this.usersService.deactivateById(id, reason);
   }
 
   @UseGuards(JwtAuthGuard, CaslGuard)
-  @CheckAbilities((ability, req) => ability.can(Action.Unban, User.create({ id: req.params.id })))
+  @CheckAbilities(async (ability, req) => canById(ability, Action.Unban, User, req.params.id))
   @Patch(':id/unban')
   async unbanUser(@Param('id') id: string) {
     return await this.usersService.reactivateById(id);

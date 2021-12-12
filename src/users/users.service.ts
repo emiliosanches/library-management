@@ -54,7 +54,7 @@ export class UsersService {
     });
   }
 
-  async update(id: string, data: UpdateUserDto) {
+  async updateById(id: string, data: UpdateUserDto) {
     const user = await this.usersRepository.findOneOrFail(id);
 
     const updatedUser = User.merge(user, data);

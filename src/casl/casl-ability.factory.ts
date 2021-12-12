@@ -3,7 +3,19 @@ import { Ability, AbilityBuilder, AbilityClass, ExtractSubjectType, InferSubject
 import { User } from "src/users/entities/user.entity";
 import { Action } from "./actions";
 
-type Subjects = InferSubjects<typeof User> | 'all';
+class Test {
+  static async findOne(): Promise<Test> {
+    return new Test();
+  }
+
+  testeProp: string;
+
+  toJSON(): any {
+
+  }
+}
+
+export type Subjects = InferSubjects<typeof User | typeof Test, true> | 'all';
 
 export type AppAbility = Ability<[Action, Subjects]>;
 
